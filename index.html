@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Categorize Together</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1f2937;--mute:#6b7280;--line:#e5e7eb;--accent:#4338ca;--ok:#15803d;--warn:#b45309}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,"Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.45}
+.banner{background:#fef3c7;color:#78350f;text-align:center;padding:6px 12px;font-size:14px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:var(--card);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.top .t{font-weight:700}.top .m{color:var(--mute);font-size:14px}
+main{max-width:1280px;margin:0 auto;padding:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+.center{max-width:720px;margin:40px auto;text-align:center}
+h1{font-size:26px;margin:0 0 6px}h2{font-size:20px;margin:0 0 8px}h3{font-size:17px;margin:0 0 8px}
+p{margin:6px 0}.mute{color:var(--mute)}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 14px}
+button:hover{background:#f3f4f6}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.primary:hover{background:#3730a3}
+button.primary:disabled{opacity:.45;cursor:not-allowed}
+button.danger{color:#b91c1c}
+button.link{border:none;background:none;color:var(--accent);padding:4px 0}
+button.sm{padding:3px 9px;font-size:14px}
+input[type=text],input:not([type]),input[type=number],textarea,select{font:inherit;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;width:100%;background:#fff}
+textarea{resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:start}
+.two>div{display:flex;flex-direction:column;gap:8px}
+.colsgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+.col{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.col h3{color:var(--c)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 11px;font-size:15px;user-select:none}
+.chip.sel{background:#e0e7ff;border-color:var(--accent)}
+.chip.rel{border-color:var(--c);border-inline-start:6px solid var(--c);border-radius:8px;cursor:grab}
+.chip.rel.picked{background:#fef9c3;box-shadow:0 0 0 2px #facc15}
+.chip b{font-weight:600;color:var(--ok);font-size:12px}
+.chip .n{font-size:12px;color:var(--mute)}
+.chip .x{cursor:pointer;color:#b91c1c;font-weight:700;padding:0 2px}
+.chip.in{background:#ecfdf5;border-color:#6ee7b7}
+.grp{border-inline-start:5px solid var(--g,#999)}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.spacer{flex:1}
+.prog{height:10px;background:#e5e7eb;border-radius:6px;overflow:hidden;margin:8px 0}
+.prog>i{display:block;height:100%;background:var(--ok)}
+.name{display:inline-block;padding:3px 10px;border-radius:999px;background:#f3f4f6;margin:2px}
+.name.ok{background:#dcfce7}
+.code{font-size:44px;font-weight:800;letter-spacing:6px;color:var(--accent)}
+.sort{display:grid;grid-template-columns:400px 1fr;gap:16px;align-items:start}
+.lists{position:sticky;top:8px;max-height:calc(100vh - 20px);overflow:auto}
+.lcard{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;background:#fcfcfd}
+.lcard h4{margin:0 0 6px;font-size:15px}
+.lrel{margin:6px 0}.lrel small{color:var(--c);font-weight:700;display:block;margin-bottom:3px}
+.catgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.cat{background:#fff;border:2px dashed #cbd5e1;border-radius:12px;padding:10px;min-height:120px}
+.cat.over{border-color:var(--accent);background:#eef2ff}
+.cat h4{margin:0 0 8px;font-size:16px}
+.cat .chips{gap:5px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.stars{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(var(--min,340px),1fr))}
+.starbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px;cursor:pointer}
+.starbox.big{cursor:default}
+.star{width:100%;height:auto;display:block}
+.star text{unicode-bidi:plaintext;font-family:inherit}
+table.t{border-collapse:collapse;width:100%;background:#fff}
+table.t th,table.t td{border:1px solid var(--line);padding:8px;vertical-align:top;text-align:start}
+table.t th{background:#f3f4f6}
+.legend span{display:inline-flex;align-items:center;gap:5px;margin-inline-end:14px}
+.legend i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.merge{display:grid;grid-template-columns:1fr 1.3fr;gap:16px;align-items:start}
+.err{color:#b91c1c;min-height:1.3em}
+.lang{margin-top:14px;font-size:14px}.lang button{padding:2px 10px;font-size:14px}.lang button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.intro{max-width:900px;margin:20px auto}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}
+.step{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.5}
+.step b{display:block;font-size:15px;margin-bottom:4px}
+.step .tm{color:var(--mute);font-size:13px;margin-top:6px}
+.note{background:#eef2ff;color:#3730a3;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.6;margin:12px 0}
+.setup{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;align-items:start}
+.fld-g{margin-bottom:14px}.fld-g label.l{font-weight:600;font-size:14px;display:block;margin-bottom:4px}
+.fld-g small{display:block;color:var(--mute);font-size:13px;margin-top:3px}
+.rowc{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.pv{border:1px dashed #94a3b8;border-radius:10px;padding:12px;background:#fafafa;position:sticky;top:8px}
+.pv .pcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px}
+.pv .pcols div{border:1px solid var(--line);border-top:3px solid var(--c);border-radius:6px;padding:6px;background:#fff;font-size:13px;min-height:84px}
+.pv .pcols span{display:block;border-bottom:1px solid var(--line);height:14px;margin-top:5px}
+@media (max-width:900px){.two,.merge,.sort,.setup{grid-template-columns:1fr}.lists,.pv{position:static;max-height:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============ הגדרות / Settings ============ */
+// Firebase config (same project as the first app). Add ?local to the URL to force local test mode.
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAWJdw86XrAjOX85P1u5OpNEPhlc9iwrGA",
+  authDomain: "non-essentialist-monotheism.firebaseapp.com",
+  databaseURL: "https://non-essentialist-monotheism-default-rtdb.firebaseio.com",
+  projectId: "non-essentialist-monotheism",
+  storageBucket: "non-essentialist-monotheism.firebasestorage.app",
+  messagingSenderId: "409344774326",
+  appId: "1:409344774326:web:e9dbfda85fb7d526e45617"
+};
+const PALETTE = ['#2563eb','#d97706','#059669','#9333ea','#dc2626','#0891b2','#65a30d'];
+const COLKEYS = 'abcdefg';
+const MIN_COLS = 2, MAX_COLS = 7;
+
+/* ============ Strings (he / en) ============ */
+const L = {
+he:{
+ app:'תרגיל קטגוריות משותף',
+ local:'מצב בדיקה מקומי – ללא Firebase. עובד רק בין לשוניות של אותו דפדפן.',
+ landSub:'תרגיל כיתתי: הכיתה בונה יחד קטגוריות',
+ students:'תלמידים', teacher:'מרצה', roomCode:'קוד חדר', yourName:'השם שלך', enter:'כניסה',
+ newRoom:'פתיחת חדר חדש', resume:n=>'המשך חדר '+n,
+ errCode:'קוד חדר הוא 4 ספרות', errName:'נא להקליד שם', errConn:'שגיאת חיבור', errNoRoom:'חדר לא נמצא', errOther:'בחר/י שם אחר',
+ errNoConfig:'החדר נוצר בגרסה אחרת של האפליקציה ואי אפשר להצטרף אליו.',
+ nameExists:n=>'השם "'+n+'" כבר קיים בחדר. האם זה/זו אתה/את שחזרת? (אישור = כן, ביטול = בחר שם אחר)',
+ loading:'טוען…', roomGone:'החדר לא נמצא או נסגר', back:'חזרה', leave:'יציאה', notInRoom:'לא נמצאת ברשימת החדר',
+ room:'חדר', studentLbl:n=>'תלמיד/ה: '+n, teacherLbl:'מרצה',
+ phases:['כניסה','שלב א׳ – רישום','שלב ב׳ – הצעת קטגוריות','שלב ג׳ – איחוד קטגוריות','סיכום המרצה','שלב ד׳ – שיוך לקטגוריות'],
+ welcome:n=>'ברוכים הבאים, '+n, waitStart:'ממתינים שהמרצה יתחיל את התרגיל…',
+ teacherSumming:'המרצה מסכם את הקטגוריות', soon:'עוד רגע ממשיכים…',
+ doneTitle:'סיימת ✓', waitClass:(k,n)=>'ממתינים לשאר הכיתה… ('+k+' מתוך '+n+' סיימו)', reopen:'חזרה לעריכה',
+ s1t:'שלב א׳ – רישום', addField:'+ הוסף שדה', done:'סיימתי', emptyConfirm:'לא רשמת כלום. לסיים בכל זאת?',
+ s2t:'שלב ב׳ – הצעת קטגוריות', myCats:'הקטגוריות שלי', catN:n=>'קטגוריה '+n, myItems:nN=>nN+' שרשמתי (להיזכר)',
+ s3t:'שלב ג׳ – איחוד קטגוריות דומות',
+ s3d:'אלה כל הקטגוריות שהוצעו בכיתה. סמנו כמה קטגוריות שהן בעצם <b>אותה קטגוריה</b> בניסוחים שונים ולחצו “צור קבוצה”. אפשר ליצור כמה קבוצות.',
+ proposedBy:n=>'הוצעה ע״י '+n+' תלמידים', noneProposed:'לא הוצעו קטגוריות',
+ mkGroup:n=>'צור קבוצה מ-'+n+' נבחרות', myGroups:'הקבוצות שיצרתי', groupN:i=>'קבוצה '+i, noGroupsYet:'עדיין לא יצרת קבוצות (לא חובה)', del:'מחק',
+ s5t:'שלב ד׳ – שיוך לקטגוריות',
+ s5d:nN=>'פתחו את הרשימות של חברים (ושלכם) וגררו '+nN+' אל הקטגוריות. אפשר לשייך פריט לכמה קטגוריות. (אפשר גם ללחוץ על פריט ואז על קטגוריה.)',
+ lists:'הרשימות', pickName:'בחרו שם כדי לפתוח רשימה', me:' (אני)', listOf:n=>'הרשימה של '+n,
+ codeShow:'קוד חדר להקרנה', directLink:'או קישור ישיר:', connected:n=>'מחוברים ('+n+')', nobody:'עדיין אף אחד',
+ seed:'טען 8 תלמידים מדומים (לבדיקה)',
+ progress:(k,n)=>k+' מתוך '+n+' לחצו “סיימתי”',
+ prev:'◀ שלב קודם', nexts:['התחל שלב א׳','עבור לשלב ב׳','עבור לשלב ג׳','עבור לסיכום המרצה','פתח שלב ד׳ לתלמידים'],
+ onlyDone:(k,n)=>'רק '+k+' מתוך '+n+' סיימו. להמשיך בכל זאת?', noStudents:'אין תלמידים מחוברים. להתחיל בכל זאת?',
+ delRoom:'מחק את נתוני החדר', delRoomConfirm:'למחוק את כל נתוני החדר? אי אפשר לשחזר.',
+ mergeT:'סיכום המרצה – איחוד קטגוריות',
+ mergeD:'מימין קטגוריות גולמיות שעוד לא שויכו (המספר = כמה תלמידים הציעו), משמאל הקטגוריות הסופיות. סמנו כמה גולמיות ואז “צור קטגוריה”, או הוסיפו לקטגוריה קיימת.',
+ thrLbl:'סף הצעה אוטומטית (כמה תלמידים סימנו יחד):', auto:'הצעה אוטומטית', restSingle:'הפוך את השאר לקטגוריות נפרדות',
+ unassigned:n=>'קטגוריות שלא שויכו ('+n+')', allDone:'הכול שויך ✓', mkFin:n=>'צור קטגוריה מ-'+n+' נבחרות', clearSel:'נקה בחירה',
+ studentGroups:'קבוצות שהתלמידים יצרו', none:'אין', ofN:(c,n)=>c+'/'+n+' תלמידים', adopt:'אמץ כקטגוריה',
+ finalCats:n=>'קטגוריות סופיות ('+n+')', noneYet:'עדיין אין', rename:'שנה שם', addSel:n=>'הוסף '+n+' נבחרות',
+ delFinConfirm:'למחוק את הקטגוריה הסופית?', finName:'שם הקטגוריה הסופית:', newName:'שם חדש:',
+ noClusters:'לא נמצאו קבוצות בסף הזה. נסה סף נמוך יותר.', allAssigned:'כל חברי הקבוצה כבר שויכו.',
+ resultsT:'תוצאות – שלב ד׳ (חי)', counts:(a,b)=>a+' שיוכים מ-'+b+' תלמידים.',
+ tStars:'כל הכוכבים', tOne:'כוכב בודד', tTable:'טבלה',
+ minVotes:(inp)=>'הצג פריטים ש-'+inp+' תלמידים לפחות שייכו', csv:'ייצוא CSV', seedAssign:'מלא שיוכים מדומים', noFinal:'אין קטגוריות סופיות.',
+ colCategory:'קטגוריה', csvHead:['קטגוריה','עמודה','פריט','מספר תלמידים'],
+ /* intro + setup */
+ introT:'איך התרגיל עובד',
+ introP:'בתרגיל הזה הכיתה בונה יחד מפה של נושא, מלמטה למעלה. התלמידים רושמים פריטים, ממציאים קטגוריות שמארגנות אותם, מסכימים ביניהם אילו קטגוריות הן בעצם אותה קטגוריה, ולבסוף מסדרים את הפריטים בתוך הקטגוריות. את הקטגוריות לא נותן המרצה. הן עולות מדברי התלמידים, ולכן אפשר לראות איך הכיתה חושבת על הנושא ואילו חלוקות היא מקבלת כמובנות מאליהן.',
+ introNeed:'מה צריך: מחשב נייד לכל תלמיד, ומקרן בכיתה. משך כולל משוער: 25–40 דקות.',
+ steps:[['שלב א׳: רישום','התלמידים רושמים פריטים בכל עמודה.','5–8 דקות'],['שלב ב׳: קטגוריות','כל תלמיד מציע קטגוריות כלליות, בלי לשייך פריטים.','3–5 דקות'],['שלב ג׳: איחוד','התלמידים מקבצים קטגוריות דומות. אחר כך אתה מסכם לקטגוריות סופיות.','5–8 דקות'],['שלב ד׳: שיוך','התלמידים גוררים פריטים, שלהם ושל חברים, אל הקטגוריות.','10–15 דקות']],
+ introNote:'אתה שולט בקצב: התלמידים עוברים שלב רק כשאתה לוחץ על כפתור ההמשך. מומלץ להקרין את מסך המרצה בשלב ד׳, כדי שהכיתה תראה את הכוכבים נבנים.',
+ toSetup:'המשך להגדרות', noShow:'אל תציג שוב', tour:'סיור לדוגמה (יתווסף בהמשך)',
+ setupT:'הגדרת התרגיל', fLang:'שפת הממשק של התלמידים', fTitle:'שם התרגיל', fTitleH:'כותרת שהתלמידים רואים בראש המסך.',
+ fNoun:'מה התלמידים רושמים? (יחיד / רבים)', fNounH:'המילים האלה יוצגו בהנחיות, למשל "רשמו דברים". אם תשאיר ריק: פריט / פריטים.',
+ nounS:'דבר', nounP:'דברים',
+ fCols:'העמודות (2 עד 7)', fColsH:'כל עמודה היא רשימה נפרדת שכל תלמיד ממלא.', colPh:i=>'עמודה '+i+' (למשל: יהדות)', addCol:'הוסף עמודה',
+ fCount:'מספר שדות בכל עמודה', fStart:'נפתחים בהתחלה', fMax:'מקסימום', fCountH:'התלמיד יכול להוסיף שדות עד המקסימום. המערכת לא מכריחה למלא את כולם.',
+ fPA:'הנחיית שלב א׳', fPAH:'אם תשאיר ריק תיווצר הנחיה אוטומטית.', fPB:'הנחיית שלב ב׳',
+ pvCap:'כך התלמיד יראה את שלב א׳', openRoom:'פתח חדר', errCols:'יש לתת שם לשתי עמודות לפחות.',
+ defA:(n,max)=>'רשמו עד '+max+' '+n+' בכל עמודה.',
+ defB:n=>'הציעו קטגוריות כלליות שמארגנות את ה'+n+' שרשמתם. בשלב זה עדיין לא משייכים – רק מציעים שמות של קטגוריות.',
+ langName:'עברית'
+},
+en:{
+ app:'Categorize Together',
+ local:'Local test mode – no Firebase. Works only between tabs of the same browser.',
+ landSub:'A classroom exercise: build categories together',
+ students:'Students', teacher:'Teacher', roomCode:'Room code', yourName:'Your name', enter:'Join',
+ newRoom:'Open a new room', resume:n=>'Resume room '+n,
+ errCode:'The room code is 4 digits', errName:'Please enter a name', errConn:'Connection error', errNoRoom:'Room not found', errOther:'Please choose another name',
+ errNoConfig:'This room was created with another version of the app and cannot be joined.',
+ nameExists:n=>'The name "'+n+'" already exists in this room. Is that you, coming back? (OK = yes, Cancel = choose another name)',
+ loading:'Loading…', roomGone:'Room not found or closed', back:'Back', leave:'Leave', notInRoom:'You are not on this room’s list',
+ room:'Room', studentLbl:n=>'Student: '+n, teacherLbl:'Teacher',
+ phases:['Lobby','Stage A – listing','Stage B – proposing categories','Stage C – merging categories','Teacher summary','Stage D – sorting into categories'],
+ welcome:n=>'Welcome, '+n, waitStart:'Waiting for the teacher to start the exercise…',
+ teacherSumming:'The teacher is summarizing the categories', soon:'Continuing in a moment…',
+ doneTitle:'Done ✓', waitClass:(k,n)=>'Waiting for the rest of the class… ('+k+' of '+n+' finished)', reopen:'Back to editing',
+ s1t:'Stage A – listing', addField:'+ Add a field', done:'I’m done', emptyConfirm:'You haven’t written anything. Finish anyway?',
+ s2t:'Stage B – propose categories', myCats:'My categories', catN:n=>'Category '+n, myItems:nN=>'My '+nN+' (for reference)',
+ s3t:'Stage C – merge similar categories',
+ s3d:'These are all the categories proposed in the class. Select several categories that are really <b>the same category</b> in different words, then press “Create group”. You can create several groups.',
+ proposedBy:n=>'Proposed by '+n+' students', noneProposed:'No categories were proposed',
+ mkGroup:n=>'Create a group from '+n+' selected', myGroups:'My groups', groupN:i=>'Group '+i, noGroupsYet:'You haven’t created any groups yet (optional)', del:'Delete',
+ s5t:'Stage D – sort into categories',
+ s5d:nN=>'Open your classmates’ lists (and your own) and drag '+nN+' into the categories. An item can belong to several categories. (You can also click an item and then a category.)',
+ lists:'Lists', pickName:'Pick a name to open a list', me:' (me)', listOf:n=>n+'’s list',
+ codeShow:'Room code (to project)', directLink:'or a direct link:', connected:n=>'Connected ('+n+')', nobody:'Nobody yet',
+ seed:'Load 8 demo students (for testing)',
+ progress:(k,n)=>k+' of '+n+' pressed “I’m done”',
+ prev:'◀ Previous stage', nexts:['Start Stage A','Go to Stage B','Go to Stage C','Go to teacher summary','Open Stage D to students'],
+ onlyDone:(k,n)=>'Only '+k+' of '+n+' have finished. Continue anyway?', noStudents:'No students are connected. Start anyway?',
+ delRoom:'Delete this room’s data', delRoomConfirm:'Delete all data for this room? This cannot be undone.',
+ mergeT:'Teacher summary – merge categories',
+ mergeD:'Raw categories not yet assigned are on one side (the number = how many students proposed it); the final categories are on the other. Select several raw ones and press “Create category”, or add them to an existing category.',
+ thrLbl:'Auto-suggest threshold (how many students grouped them together):', auto:'Auto-suggest', restSingle:'Turn the rest into separate categories',
+ unassigned:n=>'Unassigned categories ('+n+')', allDone:'Everything is assigned ✓', mkFin:n=>'Create a category from '+n+' selected', clearSel:'Clear selection',
+ studentGroups:'Groups the students created', none:'None', ofN:(c,n)=>c+'/'+n+' students', adopt:'Adopt as category',
+ finalCats:n=>'Final categories ('+n+')', noneYet:'None yet', rename:'Rename', addSel:n=>'Add '+n+' selected',
+ delFinConfirm:'Delete this final category?', finName:'Name of the final category:', newName:'New name:',
+ noClusters:'No groups found at this threshold. Try a lower threshold.', allAssigned:'All members of this group are already assigned.',
+ resultsT:'Results – Stage D (live)', counts:(a,b)=>a+' placements from '+b+' students.',
+ tStars:'All stars', tOne:'Single star', tTable:'Table',
+ minVotes:(inp)=>'Show items placed by at least '+inp+' students', csv:'Export CSV', seedAssign:'Fill demo placements', noFinal:'There are no final categories.',
+ colCategory:'Category', csvHead:['Category','Column','Item','Students'],
+ introT:'How the exercise works',
+ introP:'In this exercise the class builds a map of a topic together, from the bottom up. Students list items, come up with categories to organize them, agree on which categories are really the same, and finally sort the items into the categories. The teacher does not supply the categories. They emerge from the students’ own words, so you can see how the class thinks about the topic and which divisions it takes for granted.',
+ introNeed:'What you need: a laptop for each student and a projector in the room. Estimated total time: 25–40 minutes.',
+ steps:[['Stage A: listing','Students list items in each column.','5–8 minutes'],['Stage B: categories','Each student proposes general categories, without assigning items.','3–5 minutes'],['Stage C: merging','Students group similar categories. Then you summarize them into final categories.','5–8 minutes'],['Stage D: sorting','Students drag items, their own and their classmates’, into the categories.','10–15 minutes']],
+ introNote:'You control the pace: students move to the next stage only when you press the continue button. Projecting the teacher screen during Stage D is recommended, so the class can watch the stars build up.',
+ toSetup:'Continue to setup', noShow:'Don’t show this again', tour:'Example tour (coming later)',
+ setupT:'Set up the exercise', fLang:'Students’ interface language', fTitle:'Exercise title', fTitleH:'Shown to students at the top of the screen.',
+ fNoun:'What do students list? (singular / plural)', fNounH:'These words appear in the instructions, e.g. “List texts”. If left empty: item / items.',
+ nounS:'text', nounP:'texts',
+ fCols:'Columns (2 to 7)', fColsH:'Each column is a separate list that every student fills in.', colPh:i=>'Column '+i+' (e.g. Judaism)', addCol:'Add a column',
+ fCount:'Fields per column', fStart:'Open at the start', fMax:'Maximum', fCountH:'Students can add fields up to the maximum. The system does not force them to fill all of them.',
+ fPA:'Stage A instructions', fPAH:'If left empty, a default instruction is generated.', fPB:'Stage B instructions',
+ pvCap:'How students will see Stage A', openRoom:'Open the room', errCols:'Please name at least two columns.',
+ defA:(n,max)=>'List up to '+max+' '+n+' in each column.',
+ defB:n=>'Suggest general categories that the '+n+' you listed belong to. Don’t assign them yet – just propose category names.',
+ langName:'English'
+}};
+let LANG = 'he';
+try{ LANG = localStorage.getItem('ct_lang') || 'he'; }catch(e){}
+function tr(k,...a){ const v=(L[LANG]&&L[LANG][k]!==undefined)?L[LANG][k]:L.he[k]; return typeof v==='function'?v(...a):v; }
+
+/* ============ עזרים ============ */
+const norm = s => String(s==null?'':s).replace(/\s+/g,' ').trim().toLowerCase();
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const A = x => Array.isArray(x) ? x : (x && typeof x==='object' ? Object.values(x) : []);
+const shuffle = a => a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+const uid = () => Math.random().toString(36).slice(2,9);
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+const $ = s => document.querySelector(s);
+const app = document.getElementById('app');
+
+/* ============ שכבת אחסון: Firebase או מקומי ============ */
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('load '+src));document.head.appendChild(s);});}
+const FORCE_LOCAL = /[?&]local(\b|=)/.test(location.search);
+
+const store = {
+  mode:'local', fb:null, ref:null, lkey:null, _room:null, _cb:null,
+  async init(){
+    if(FIREBASE_CONFIG && !FORCE_LOCAL){
+      await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+      await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js');
+      firebase.initializeApp(FIREBASE_CONFIG);
+      this.fb = firebase.database(); this.mode='firebase';
+    }
+  },
+  async get(room){
+    if(this.mode==='firebase') return (await this.fb.ref('rooms/'+room).once('value')).val();
+    return this._read(room);
+  },
+  listen(room, cb){
+    this.unlisten();
+    if(this.mode==='firebase'){
+      this.ref = this.fb.ref('rooms/'+room);
+      this.ref.on('value', s=>cb(s.val()));
+    } else {
+      this.lkey = 'ct_room_'+room; this._room = room; this._cb = cb;
+      window.addEventListener('storage', this._onStorage);
+      cb(this._read(room));
+    }
+  },
+  _onStorage: e => { if(e.key===store.lkey) store._cb(store._read(store._room)); },
+  unlisten(){
+    if(this.ref){this.ref.off();this.ref=null;}
+    window.removeEventListener('storage', this._onStorage);
+    this.lkey=null; this._cb=null;
+  },
+  _read(room){ try{return JSON.parse(localStorage.getItem('ct_room_'+room));}catch(e){return null;} },
+  set(room, path, val){
+    if(this.mode==='firebase'){
+      const r = path ? this.fb.ref('rooms/'+room+'/'+path) : this.fb.ref('rooms/'+room);
+      return r.set(val===undefined?null:val);
+    }
+    let o = this._read(room);
+    if(!path){
+      if(val==null) localStorage.removeItem('ct_room_'+room); else localStorage.setItem('ct_room_'+room, JSON.stringify(val));
+    } else {
+      o = o || {};
+      const ks = path.split('/'); let cur = o;
+      for(let i=0;i<ks.length-1;i++){ if(typeof cur[ks[i]]!=='object'||cur[ks[i]]===null) cur[ks[i]]={}; cur=cur[ks[i]]; }
+      const last = ks[ks.length-1];
+      if(val==null) delete cur[last]; else cur[last]=val;
+      localStorage.setItem('ct_room_'+room, JSON.stringify(o));
+    }
+    if(this._cb && this._room===room) this._cb(this._read(room));
+    return Promise.resolve();
+  }
+};
+
+/* ============ מצב ============ */
+const S = {role:null, pre:null, room:null, sid:null, name:null, data:null, loaded:false, err:''};
+let CFG = null;
+let lastSig = null;
+let draft = {items:null, cats:null};
+let saveT = null, pendingSave = null;
+let setup = null;
+const ui = {open:new Set(), sel:new Set(), selItem:null, group:new Set(), tview:'stars', focus:null, minVotes:1, thr:null};
+
+const cols = () => CFG ? CFG.cols : [];
+const colOf = k => cols().find(c=>c.k===k) || {k,name:k,color:'#888'};
+
+function normalizeConfig(c){
+  return {lang:c.lang==='en'?'en':'he', title:c.title||'', n1:c.n1||'', nN:c.nN||'',
+    cols:A(c.cols).map(x=>({k:x.k,name:x.name,color:x.color})), start:+c.start||10, max:+c.max||15, pA:c.pA||'', pB:c.pB||''};
+}
+function queueSave(fn){ pendingSave = fn; clearTimeout(saveT); saveT = setTimeout(flushSave, 250); }
+function flushSave(){ clearTimeout(saveT); if(pendingSave){ const f=pendingSave; pendingSave=null; f(); } }
+
+/* ============ נגזרות מהנתונים ============ */
+function me(d){ return (d.students||{})[S.sid]; }
+function doneCount(d,p){ return Object.values(d.students||{}).filter(s=>s.done && s.done[p]).length; }
+function itemTextMap(d){
+  const m={};
+  Object.values(d.items||{}).forEach(it=>cols().forEach(r=>A(it&&it[r.k]).forEach(x=>{const k=r.k+'|'+norm(x); if(!m[k]) m[k]=String(x).trim();})));
+  return m;
+}
+function rawCats(d){
+  const map=new Map();
+  Object.entries(d.cats||{}).forEach(([sid,arr])=>A(arr).forEach(x=>{
+    const k=norm(x); if(!k) return;
+    if(!map.has(k)) map.set(k,{key:k,voters:{},texts:{}});
+    const m=map.get(k); m.voters[sid]=1; const tt=String(x).trim(); m.texts[tt]=(m.texts[tt]||0)+1;
+  }));
+  map.forEach(m=>{ m.n=Object.keys(m.voters).length; m.text=Object.entries(m.texts).sort((a,b)=>b[1]-a[1])[0][0]; });
+  return map;
+}
+function pairSupport(d){
+  const sup=new Map();
+  Object.values(d.groups||{}).forEach(gs=>{
+    const seen=new Set();
+    A(gs).map(A).forEach(g=>{
+      const ks=[...new Set(g.map(norm))].filter(Boolean);
+      for(let i=0;i<ks.length;i++)for(let j=i+1;j<ks.length;j++){
+        const pk=[ks[i],ks[j]].sort().join('\u0001');
+        if(!seen.has(pk)){seen.add(pk);sup.set(pk,(sup.get(pk)||0)+1);}
+      }
+    });
+  });
+  return sup;
+}
+function groupSummary(d){
+  const m=new Map();
+  Object.values(d.groups||{}).forEach(gs=>A(gs).map(A).forEach(g=>{
+    const ks=[...new Set(g.map(norm))].filter(Boolean).sort(); if(ks.length<2) return;
+    const id=ks.join('\u0001'); if(!m.has(id)) m.set(id,{keys:ks,count:0}); m.get(id).count++;
+  }));
+  return [...m.values()].sort((a,b)=>b.count-a.count||b.keys.length-a.keys.length);
+}
+function finalList(d){ return A(d.final).map(c=>({id:c.id,name:c.name,members:A(c.members)})); }
+function assignedKeys(fin){ const s=new Set(); fin.forEach(c=>c.members.forEach(k=>s.add(k))); return s; }
+
+function aggregate(d, minVotes){
+  const itemText=itemTextMap(d);
+  const res=finalList(d).map(c=>({id:c.id,name:c.name,items:{}}));
+  const byId=Object.fromEntries(res.map(c=>[c.id,c]));
+  const students=new Set(); let total=0;
+  Object.entries(d.assign||{}).forEach(([sid,m])=>Object.entries(m||{}).forEach(([cid,keys])=>{
+    const c=byId[cid]; if(!c) return;
+    A(keys).forEach(k=>{ total++; students.add(sid);
+      c.items[k]=c.items[k]||{key:k,rel:k[0],text:itemText[k]||k.slice(2),voters:[]}; c.items[k].voters.push(sid); });
+  }));
+  const order=cols().map(c=>c.k);
+  res.forEach(c=>{
+    c.list=Object.values(c.items).filter(i=>i.voters.length>=minVotes)
+      .sort((a,b)=>order.indexOf(a.rel)-order.indexOf(b.rel)||b.voters.length-a.voters.length);
+  });
+  return {res,total,students:students.size};
+}
+
+/* ============ חתימת מסך ============ */
+function sig(d){
+  if(!S.role) return 'pre:'+S.pre+':'+LANG;
+  if(!d) return 'none';
+  const p=d.phase||0, st=d.students||{};
+  if(S.role==='teacher'){
+    const names=Object.entries(st).map(([id,s])=>id+':'+s.name+':'+((s.done&&s.done[p])?1:0)).join(',');
+    if(p===4) return [p,JSON.stringify(d.final||0),names].join('#');
+    if(p===5) return [p,JSON.stringify(d.final||0),JSON.stringify(d.assign||0),Object.keys(st).length].join('#');
+    return p+'#'+names;
+  }
+  const m=st[S.sid]; if(!m) return 'noMe';
+  const done=(m.done&&m.done[p])?1:0;
+  if(p===5) return [p,JSON.stringify(d.final||0),JSON.stringify((d.assign&&d.assign[S.sid])||0),Object.keys(st).length].join('#');
+  if(p===3) return [p,done,JSON.stringify((d.groups&&d.groups[S.sid])||0),done?doneCount(d,p):''].join('#');
+  return [p,done,done?doneCount(d,p):''].join('#');
+}
+function onData(d){
+  S.loaded=true; S.data=d;
+  CFG = d && d.config ? normalizeConfig(d.config) : null;
+  if(CFG) LANG = CFG.lang;
+  const s=sig(d);
+  if(s!==lastSig){ flushSave(); lastSig=s; render(); }
+}
+
+/* ============ רינדור ============ */
+function render(){
+  document.documentElement.setAttribute('dir', LANG==='he'?'rtl':'ltr');
+  document.documentElement.setAttribute('lang', LANG);
+  let html='';
+  if(!S.role){
+    html = S.pre==='intro' ? viewIntro() : S.pre==='setup' ? viewSetup() : viewLanding();
+  }
+  else if(!S.loaded) html='<main><div class="card center">'+tr('loading')+'</div></main>';
+  else if(!S.data) html='<main><div class="card center"><h2>'+tr('roomGone')+'</h2><button data-act="leave">'+tr('back')+'</button></div></main>';
+  else if(!CFG) html='<main><div class="card center"><h2>'+tr('errNoConfig')+'</h2><button data-act="leave">'+tr('back')+'</button></div></main>';
+  else html = S.role==='teacher' ? viewTeacher(S.data) : viewStudent(S.data);
+  const banner = store.mode==='local' ? '<div class="banner">'+tr('local')+'</div>' : '';
+  app.innerHTML = banner+html;
+}
+function topbar(d, roleLabel){
+  const p=d?(d.phase||0):0;
+  const brand = CFG&&CFG.title ? CFG.title : tr('app');
+  return `<div class="top"><div class="t">${esc(brand)}</div>
+  <div class="m">${esc(roleLabel)} · ${tr('room')} ${esc(S.room)} · ${esc(tr('phases')[p])}</div>
+  <button class="sm" data-act="leave">${tr('leave')}</button></div>`;
+}
+function langSwitch(){
+  return `<div class="lang">${['he','en'].map(l=>`<button class="${LANG===l?'on':''}" data-act="setlang" data-v="${l}">${L[l].langName}</button>`).join(' ')}</div>`;
+}
+
+function viewLanding(){
+  const urlRoom=new URLSearchParams(location.search).get('room')||'';
+  let saved=null; try{saved=JSON.parse(localStorage.getItem('ct_teacher'));}catch(e){}
+  return `<main><div class="card center"><h1>${tr('app')}</h1>
+  <p class="mute">${tr('landSub')}</p><div style="height:14px"></div>
+  <div class="two">
+   <div><h2>${tr('students')}</h2>
+    <input id="code" inputmode="numeric" placeholder="${esc(tr('roomCode'))}" value="${esc(urlRoom)}">
+    <input id="name" placeholder="${esc(tr('yourName'))}">
+    <button class="primary" data-act="join">${tr('enter')}</button></div>
+   <div><h2>${tr('teacher')}</h2>
+    <button class="primary" data-act="newroom">${tr('newRoom')}</button>
+    ${saved?`<button data-act="resume">${tr('resume',esc(saved.room))}</button>`:''}</div>
+  </div><div class="err" id="err">${esc(S.err)}</div>${langSwitch()}</div></main>`;
+}
+
+/* ---------- מסך פתיחה והגדרות (מרצה) ---------- */
+function viewIntro(){
+  const st=tr('steps');
+  return `<main><div class="card intro"><h2>${tr('introT')}</h2>
+  <p>${tr('introP')}</p><p class="mute">${tr('introNeed')}</p>
+  <div class="steps">${st.map(s=>`<div class="step"><b>${esc(s[0])}</b>${esc(s[1])}<div class="tm">${esc(s[2])}</div></div>`).join('')}</div>
+  <div class="note">${tr('introNote')}</div>
+  <div class="bar"><button class="primary" data-act="tosetup">${tr('toSetup')}</button>
+   <label class="mute" style="font-size:14px"><input type="checkbox" id="noshow"> ${tr('noShow')}</label>
+   <span class="mute" style="font-size:14px">${tr('tour')}</span><span class="spacer"></span>
+   <button class="sm" data-act="leave">${tr('back')}</button></div>${langSwitch()}</div></main>`;
+}
+function newSetup(){ return {lang:LANG,title:'',n1:'',nN:'',cols:['',''],start:10,max:15,pA:'',pB:''}; }
+function effCfg(){
+  const s=setup, def=s.lang==='he'?{n1:'פריט',nN:'פריטים'}:{n1:'item',nN:'items'};
+  const n1=s.n1.trim()||def.n1, nN=s.nN.trim()||def.nN;
+  const names=s.cols.map(x=>x.trim()).filter(Boolean);
+  const max=clamp(parseInt(s.max)||15,1,30), start=clamp(parseInt(s.start)||10,1,max);
+  const prevLang=LANG; LANG=s.lang;
+  const pA=s.pA.trim()||tr('defA',nN,max), pB=s.pB.trim()||tr('defB',nN);
+  LANG=prevLang;
+  return {lang:s.lang,title:s.title.trim(),n1,nN,cols:names.map((name,i)=>({k:COLKEYS[i],name,color:PALETTE[i]})),start,max,pA,pB};
+}
+function previewHTML(){
+  const c=effCfg(), s=setup;
+  const shown=s.cols.map((x,i)=>({name:x.trim()||(s.lang==='he'?'עמודה ':'Column ')+(i+1),color:PALETTE[i]}));
+  return `<div style="font-weight:700;margin-bottom:4px">${esc(c.title||'')}</div>
+  <p style="font-size:14px;margin:0 0 8px">${esc(c.pA)}</p>
+  <div class="pcols">${shown.map(x=>`<div style="--c:${x.color}"><b style="color:${x.color}">${esc(x.name)}</b><span></span><span></span><span></span></div>`).join('')}</div>`;
+}
+function viewSetup(){
+  if(!setup) setup=newSetup();
+  const s=setup;
+  return `<main><div class="card intro"><h2>${tr('setupT')}</h2><div class="setup"><div>
+   <div class="fld-g"><label class="l">${tr('fLang')}</label><select data-bind="lang">${['he','en'].map(l=>`<option value="${l}" ${s.lang===l?'selected':''}>${L[l].langName}</option>`).join('')}</select></div>
+   <div class="fld-g"><label class="l">${tr('fTitle')}</label><input type="text" data-bind="title" value="${esc(s.title)}"><small>${tr('fTitleH')}</small></div>
+   <div class="fld-g"><label class="l">${tr('fNoun')}</label><div class="rowc"><input type="text" data-bind="n1" value="${esc(s.n1)}" placeholder="${esc(tr('nounS'))}"><input type="text" data-bind="nN" value="${esc(s.nN)}" placeholder="${esc(tr('nounP'))}"></div><small>${tr('fNounH')}</small></div>
+   <div class="fld-g"><label class="l">${tr('fCols')}</label>
+    ${s.cols.map((v,i)=>`<div class="rowc"><input type="text" data-bind="col" data-i="${i}" value="${esc(v)}" placeholder="${esc(tr('colPh',i+1))}">${s.cols.length>MIN_COLS?`<button class="sm danger" data-act="rmcol" data-i="${i}">×</button>`:''}</div>`).join('')}
+    ${s.cols.length<MAX_COLS?`<button class="sm" data-act="addcol">${tr('addCol')}</button>`:''}<small>${tr('fColsH')}</small></div>
+   <div class="fld-g"><label class="l">${tr('fCount')}</label><div class="rowc">${tr('fStart')} <input type="number" data-bind="start" value="${esc(s.start)}" style="width:80px"> ${tr('fMax')} <input type="number" data-bind="max" value="${esc(s.max)}" style="width:80px"></div><small>${tr('fCountH')}</small></div>
+   <div class="fld-g"><label class="l">${tr('fPA')}</label><textarea rows="2" data-bind="pA">${esc(s.pA)}</textarea><small>${tr('fPAH')}</small></div>
+   <div class="fld-g"><label class="l">${tr('fPB')}</label><textarea rows="2" data-bind="pB">${esc(s.pB)}</textarea><small>${tr('fPAH')}</small></div>
+  </div><div><p class="mute" style="font-size:13px;margin:0 0 6px">${tr('pvCap')}</p><div class="pv" id="pv">${previewHTML()}</div></div></div>
+  <div class="err" id="err">${esc(S.err)}</div>
+  <div class="bar"><button class="primary" data-act="createroom">${tr('openRoom')}</button><button data-act="leave">${tr('back')}</button></div></div></main>`;
+}
+
+/* ---------- תלמיד ---------- */
+function viewStudent(d){
+  const m=me(d); if(!m) return '<main><div class="card center"><h2>'+tr('notInRoom')+'</h2><button data-act="leave">'+tr('back')+'</button></div></main>';
+  const p=d.phase||0;
+  const head=topbar(d,tr('studentLbl',S.name));
+  const done=m.done&&m.done[p];
+  let body='';
+  if(p===0) body=`<div class="card center"><h2>${esc(tr('welcome',S.name))}</h2><p>${tr('waitStart')}</p></div>`;
+  else if(p===4) body=`<div class="card center"><h2>${tr('teacherSumming')}</h2><p>${tr('soon')}</p></div>`;
+  else if(p===5) body=viewS5(d);
+  else if(done) body=waitingView(d,p);
+  else if(p===1) body=viewS1(d);
+  else if(p===2) body=viewS2(d);
+  else if(p===3) body=viewS3(d);
+  return head+'<main>'+body+'</main>';
+}
+function waitingView(d,p){
+  const n=Object.keys(d.students||{}).length, k=doneCount(d,p);
+  return `<div class="card center"><h2>${tr('doneTitle')}</h2><p>${tr('waitClass',k,n)}</p>
+  <div class="prog"><i style="width:${n?Math.round(100*k/n):0}%"></i></div>
+  <button data-act="reopen">${tr('reopen')}</button></div>`;
+}
+function ensureDraft(d){
+  const own=(d.items&&d.items[S.sid])||{};
+  if(!draft.items){
+    draft.items={};
+    cols().forEach(r=>{ const a=A(own[r.k]).map(String); while(a.length<CFG.start) a.push(''); draft.items[r.k]=a; });
+  }
+  if(!draft.cats){
+    const a=A(d.cats&&d.cats[S.sid]).map(String); while(a.length<6) a.push(''); draft.cats=a;
+  }
+}
+function viewS1(d){
+  ensureDraft(d);
+  const cs=cols().map(r=>`<section class="col" style="--c:${r.color}"><h3>${esc(r.name)}</h3>
+    ${draft.items[r.k].map((v,i)=>`<input class="fld" data-kind="item" data-rel="${r.k}" data-i="${i}" value="${esc(v)}" placeholder="${i+1}">`).join('')}
+    ${draft.items[r.k].length<CFG.max?`<button class="link" data-act="addfld" data-rel="${r.k}">${tr('addField')}</button>`:''}</section>`).join('');
+  return `<div class="card"><h2>${tr('s1t')}</h2><p>${esc(CFG.pA||tr('defA',CFG.nN||'',CFG.max))}</p></div>
+  <div class="colsgrid">${cs}</div>
+  <div class="bar"><span class="spacer"></span><button class="primary" data-act="done">${tr('done')}</button></div>`;
+}
+function viewS2(d){
+  ensureDraft(d);
+  const own=(d.items&&d.items[S.sid])||{};
+  const reminder=cols().map(r=>`<div class="lrel" style="--c:${r.color}"><small>${esc(r.name)}</small><div class="chips">${A(own[r.k]).map(x=>`<span class="chip rel" style="--c:${r.color}">${esc(x)}</span>`).join('')}</div></div>`).join('');
+  return `<div class="card"><h2>${tr('s2t')}</h2><p>${esc(CFG.pB||tr('defB',CFG.nN||''))}</p></div>
+  <div class="merge"><div class="card"><h3>${tr('myCats')}</h3>
+   ${draft.cats.map((v,i)=>`<div style="margin:6px 0"><input class="fld" data-kind="cat" data-i="${i}" value="${esc(v)}" placeholder="${esc(tr('catN',i+1))}"></div>`).join('')}
+   <button class="link" data-act="addcat">${tr('addField')}</button></div>
+  <div class="card"><h3>${esc(tr('myItems',CFG.nN))}</h3>${reminder}</div></div>
+  <div class="bar"><span class="spacer"></span><button class="primary" data-act="done">${tr('done')}</button></div>`;
+}
+function viewS3(d){
+  const raw=[...rawCats(d).values()].sort((a,b)=>b.n-a.n||a.text.localeCompare(b.text,LANG));
+  const groups=A(d.groups&&d.groups[S.sid]).map(A);
+  const inGroup={}; groups.forEach((g,i)=>g.forEach(x=>inGroup[norm(x)]=i));
+  const gcol=i=>`hsl(${(i*67+210)%360} 60% 45%)`;
+  const chips=raw.map(c=>{
+    const gi=inGroup[c.key];
+    return `<span class="chip ${ui.group.has(c.key)?'sel':''} ${gi!=null?'grp':''}" style="${gi!=null?'--g:'+gcol(gi):''}" data-act="gtoggle" data-key="${esc(c.key)}" title="${esc(tr('proposedBy',c.n))}">${esc(c.text)}${c.n>1?`<span class="n">×${c.n}</span>`:''}</span>`;
+  }).join('');
+  const textOf=Object.fromEntries(raw.map(c=>[c.key,c.text]));
+  return `<div class="card"><h2>${tr('s3t')}</h2><p>${tr('s3d')}</p></div>
+  <div class="card"><div class="chips">${chips||'<span class="mute">'+tr('noneProposed')+'</span>'}</div>
+   <div class="bar"><button class="primary" data-act="mkgroup" ${ui.group.size<2?'disabled':''}>${tr('mkGroup',ui.group.size)}</button></div></div>
+  <div class="card"><h3>${tr('myGroups')}</h3>
+   ${groups.length?groups.map((g,i)=>`<div class="chips" style="margin:6px 0"><span class="chip grp" style="--g:${gcol(i)}">${esc(tr('groupN',i+1))}</span>${g.map(x=>`<span class="chip">${esc(textOf[norm(x)]||x)}</span>`).join('')}<button class="sm danger" data-act="rmgroup" data-i="${i}">${tr('del')}</button></div>`).join(''):'<span class="mute">'+tr('noGroupsYet')+'</span>'}</div>
+  <div class="bar"><span class="spacer"></span><button class="primary" data-act="done">${tr('done')}</button></div>`;
+}
+function viewS5(d){
+  const fin=finalList(d), itemText=itemTextMap(d);
+  const myA=(d.assign&&d.assign[S.sid])||{};
+  const used={}; Object.values(myA).forEach(ks=>A(ks).forEach(k=>used[k]=(used[k]||0)+1));
+  const students=Object.entries(d.students||{}).sort((a,b)=>(a[0]===S.sid?-1:b[0]===S.sid?1:a[1].name.localeCompare(b[1].name,LANG)));
+  const btns=students.map(([id,s])=>`<button class="sm ${ui.open.has(id)?'primary':''}" data-act="openlist" data-id="${esc(id)}">${esc(s.name)}${id===S.sid?tr('me'):''}</button>`).join(' ');
+  const cards=students.filter(([id])=>ui.open.has(id)).map(([id,s])=>{
+    const it=(d.items&&d.items[id])||{};
+    return `<div class="lcard"><h4>${esc(tr('listOf',s.name))}</h4>${cols().map(r=>{
+      const arr=A(it[r.k]); if(!arr.length) return '';
+      return `<div class="lrel" style="--c:${r.color}"><small>${esc(r.name)}</small><div class="chips">${arr.map(x=>{
+        const key=r.k+'|'+norm(x), u=used[key];
+        return `<span class="chip rel ${ui.selItem===key?'picked':''}" style="--c:${r.color}" draggable="true" data-act="pick" data-key="${esc(key)}">${esc(x)}${u?`<b>✓${u}</b>`:''}</span>`;
+      }).join('')}</div></div>`;}).join('')}</div>`;
+  }).join('');
+  const boxes=fin.map(c=>{
+    const ks=A(myA[c.id]);
+    return `<div class="cat" data-cid="${esc(c.id)}" data-act="putsel"><h4>${esc(c.name)}</h4><div class="chips">${ks.map(k=>`<span class="chip rel" style="--c:${colOf(k[0]).color}">${esc(itemText[k]||k.slice(2))}<span class="x" data-act="unassign" data-cid="${esc(c.id)}" data-key="${esc(k)}">×</span></span>`).join('')}</div></div>`;
+  }).join('');
+  return `<div class="card"><h2>${tr('s5t')}</h2><p>${esc(tr('s5d',CFG.nN||''))}</p></div>
+  <div class="sort"><div class="lists card"><h3>${tr('lists')}</h3><div class="chips">${btns}</div>${cards||'<p class="mute">'+tr('pickName')+'</p>'}</div>
+  <div><div class="catgrid">${boxes}</div></div></div>`;
+}
+
+/* ---------- מרצה ---------- */
+function navBar(d,p){
+  const canNext = p<5 && !(p===4 && !A(d.final).length);
+  return `<div class="bar">${p>0?'<button data-act="prev">'+tr('prev')+'</button>':''}<span class="spacer"></span>
+   ${p<5?`<button class="primary" data-act="next" ${canNext?'':'disabled'}>${tr('nexts')[p]}</button>`:''}</div>`;
+}
+function progressBlock(d,p){
+  const st=Object.entries(d.students||{}), k=doneCount(d,p);
+  return `<div class="card"><h2>${esc(tr('phases')[p])}</h2><p>${tr('progress',k,st.length)}</p>
+  <div class="prog"><i style="width:${st.length?Math.round(100*k/st.length):0}%"></i></div>
+  <div>${st.map(([id,s])=>`<span class="name ${s.done&&s.done[p]?'ok':''}">${s.done&&s.done[p]?'✓ ':''}${esc(s.name)}</span>`).join('')}</div></div>`;
+}
+function viewTeacher(d){
+  const p=d.phase||0, st=Object.entries(d.students||{});
+  let body='';
+  const debug = store.mode==='local' || /debug/.test(location.search);
+  if(p===0){
+    const base=location.protocol==='file:'?location.href.split('?')[0]:location.origin+location.pathname;
+    const link=base+'?room='+S.room;
+    body=`<div class="card center" style="margin:0 auto 16px"><p class="mute">${tr('codeShow')}</p><div class="code">${esc(S.room)}</div>
+      <p class="mute">${tr('directLink')}</p><p dir="ltr" style="word-break:break-all">${esc(link)}</p></div>
+      <div class="card"><h2>${tr('connected',st.length)}</h2><div>${st.map(([id,s])=>`<span class="name">${esc(s.name)}</span>`).join('')||'<span class="mute">'+tr('nobody')+'</span>'}</div>
+      ${debug?'<div class="bar"><button data-act="seed">'+tr('seed')+'</button></div>':''}</div>`+navBar(d,p);
+  } else if(p>=1&&p<=3){
+    body=progressBlock(d,p)+navBar(d,p);
+  } else if(p===4){
+    body=viewMerge(d)+navBar(d,p);
+  } else {
+    body=viewResults(d,debug)+navBar(d,p);
+  }
+  body += `<div class="bar" style="margin-top:30px"><span class="spacer"></span><button class="danger sm" data-act="delroom">${tr('delRoom')}</button></div>`;
+  return topbar(d,tr('teacherLbl'))+'<main>'+body+'</main>';
+}
+
+function defaultThr(d){ const n=Object.keys(d.students||{}).length; return ui.thr!=null?ui.thr:Math.max(1,Math.min(3,Math.round(n*0.25))); }
+function viewMerge(d){
+  const raw=rawCats(d), fin=finalList(d), used=assignedKeys(fin);
+  const free=[...raw.values()].filter(c=>!used.has(c.key)).sort((a,b)=>b.n-a.n||a.text.localeCompare(b.text,LANG));
+  const thr=defaultThr(d);
+  const gs=groupSummary(d).slice(0,12);
+  const n=Object.keys(d.students||{}).length;
+  const freeChips=free.map(c=>`<span class="chip ${ui.sel.has(c.key)?'sel':''}" data-act="seltoggle" data-key="${esc(c.key)}">${esc(c.text)}<span class="n">×${c.n}</span></span>`).join('');
+  const finCards=fin.map(c=>`<div class="card" style="margin-bottom:10px"><div class="bar" style="margin:0 0 8px"><h3 style="margin:0">${esc(c.name)}</h3>
+    <button class="link" data-act="renfin" data-id="${esc(c.id)}">${tr('rename')}</button><span class="spacer"></span>
+    <button class="sm" data-act="addsel" data-id="${esc(c.id)}" ${ui.sel.size?'':'disabled'}>${tr('addSel',ui.sel.size)}</button>
+    <button class="sm danger" data-act="delfin" data-id="${esc(c.id)}">${tr('del')}</button></div>
+    <div class="chips">${c.members.map(k=>`<span class="chip in">${esc(raw.get(k)?raw.get(k).text:k)}<span class="x" data-act="rmmember" data-id="${esc(c.id)}" data-key="${esc(k)}">×</span></span>`).join('')}</div></div>`).join('');
+  const gsHtml=gs.map((g,i)=>`<div class="chips" style="margin:6px 0"><span class="chip">${tr('ofN',g.count,n)}</span>${g.keys.map(k=>`<span class="chip ${used.has(k)?'in':''}">${esc(raw.get(k)?raw.get(k).text:k)}</span>`).join('')}<button class="sm" data-act="adoptgrp" data-i="${i}">${tr('adopt')}</button></div>`).join('');
+  return `<div class="card"><h2>${tr('mergeT')}</h2><p>${tr('mergeD')}</p>
+   <div class="bar" style="margin-top:6px"><label>${tr('thrLbl')} <input type="number" id="thr" min="1" value="${thr}" style="width:70px"></label>
+   <button data-act="auto">${tr('auto')}</button><button data-act="restsingle">${tr('restSingle')}</button></div></div>
+   <div class="merge"><div>
+    <div class="card"><h3>${tr('unassigned',free.length)}</h3><div class="chips">${freeChips||'<span class="mute">'+tr('allDone')+'</span>'}</div>
+     <div class="bar"><button class="primary" data-act="mkfin" ${ui.sel.size?'':'disabled'}>${tr('mkFin',ui.sel.size)}</button><button class="sm" data-act="selnone">${tr('clearSel')}</button></div></div>
+    <div class="card"><h3>${tr('studentGroups')}</h3>${gsHtml||'<span class="mute">'+tr('none')+'</span>'}</div></div>
+   <div><h3>${tr('finalCats',fin.length)}</h3>${finCards||'<div class="card mute">'+tr('noneYet')+'</div>'}</div></div>`;
+}
+
+function trunc(s,n){ s=String(s); return s.length>n? s.slice(0,n-1)+'…':s; }
+function starSVG(c){
+  const W=800,H=600,cx=400,cy=300, items=c.list, n=items.length;
+  const fs=n>26?12:n>16?14:16;
+  let o=`<svg viewBox="0 0 ${W} ${H}" class="star" direction="ltr">`;
+  items.forEach((it,i)=>{
+    const ang=-Math.PI/2+i*2*Math.PI/n, stag=(n>12&&i%2)?0.74:1;
+    const x=cx+Math.cos(ang)*250*stag, y=cy+Math.sin(ang)*215*stag, col=colOf(it.rel).color;
+    const w=1+Math.min(it.voters.length,6)*0.8, co=Math.cos(ang), si=Math.sin(ang);
+    const lab=trunc(it.text+(it.voters.length>1?' ×'+it.voters.length:''),22);
+    let tx=x, ty=y, anchor='middle';
+    if(co>0.2){tx=x+9;anchor='start';ty=y+4;} else if(co<-0.2){tx=x-9;anchor='end';ty=y+4;} else {ty=si<0?y-11:y+20;}
+    o+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${col}" stroke-width="${w}" opacity=".55"/>
+    <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${4+Math.min(it.voters.length,5)}" fill="${col}"/>
+    <text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${anchor}" font-size="${fs}" fill="#1f2937"><title>${esc(it.text)} (${it.voters.length})</title>${esc(lab)}</text>`;
+  });
+  const words=c.name.split(' '); let l1=c.name,l2='';
+  if(c.name.length>11&&words.length>1){ let best=1,bd=1e9; for(let i=1;i<words.length;i++){const a=words.slice(0,i).join(' ').length; const dd=Math.abs(a-c.name.length/2); if(dd<bd){bd=dd;best=i;}} l1=words.slice(0,best).join(' '); l2=words.slice(best).join(' '); }
+  o+=`<ellipse cx="${cx}" cy="${cy}" rx="92" ry="48" fill="#312e81"/>
+   <text x="${cx}" y="${l2?cy-3:cy+6}" text-anchor="middle" font-size="19" font-weight="700" fill="#fff">${esc(trunc(l1,16))}</text>
+   ${l2?`<text x="${cx}" y="${cy+21}" text-anchor="middle" font-size="19" font-weight="700" fill="#fff">${esc(trunc(l2,16))}</text>`:''}</svg>`;
+  return o;
+}
+function viewResults(d,debug){
+  const agg=aggregate(d,ui.minVotes), res=agg.res;
+  const legend=`<span class="legend">${cols().map(r=>`<span><i style="background:${r.color}"></i>${esc(r.name)}</span>`).join('')}</span>`;
+  const tab=(k,l)=>`<button class="${ui.tview===k?'on':''}" data-act="tview" data-v="${k}">${l}</button>`;
+  let main='';
+  if(!res.length) main='<div class="card mute">'+tr('noFinal')+'</div>';
+  else if(ui.tview==='stars'){
+    main=`<div class="stars" style="--min:360px">${res.map(c=>`<div class="starbox" data-act="focus" data-id="${esc(c.id)}">${starSVG(c)}</div>`).join('')}</div>`;
+  } else if(ui.tview==='one'){
+    const cur=res.find(c=>c.id===ui.focus)||res[0]; ui.focus=cur.id;
+    main=`<div class="tabs">${res.map(c=>`<button class="sm ${c.id===cur.id?'primary':''}" data-act="focus1" data-id="${esc(c.id)}">${esc(c.name)} (${c.list.length})</button>`).join('')}</div>
+    <div class="starbox big" style="max-width:1000px;margin:auto">${starSVG(cur)}</div>`;
+  } else {
+    main=`<table class="t"><tr><th>${tr('colCategory')}</th>${cols().map(r=>`<th style="color:${r.color}">${esc(r.name)}</th>`).join('')}</tr>
+    ${res.map(c=>`<tr><th>${esc(c.name)}</th>${cols().map(r=>`<td>${c.list.filter(i=>i.rel===r.k).map(i=>esc(i.text)+(i.voters.length>1?' ×'+i.voters.length:'')).join(' · ')}</td>`).join('')}</tr>`).join('')}</table>`;
+  }
+  const minInp=`<input type="number" id="minv" min="1" value="${ui.minVotes}" style="width:60px">`;
+  return `<div class="card"><h2>${tr('resultsT')}</h2>
+   <p>${tr('counts',agg.total,agg.students)}</p>
+   <div class="tabs">${tab('stars',tr('tStars'))}${tab('one',tr('tOne'))}${tab('table',tr('tTable'))}
+    <span class="spacer"></span>
+    <label>${tr('minVotes',minInp)}</label>
+    <button data-act="csv">${tr('csv')}</button>${debug?'<button data-act="seedassign">'+tr('seedAssign')+'</button>':''}</div>
+   <div class="legend">${legend}</div></div>${main}`;
+}
+
+/* ============ פעולות ============ */
+function finSave(arr){ store.set(S.room,'final',arr); }
+function mutFin(fn){ const f=finalList(S.data); fn(f); finSave(f); }
+function clusters(d, thr, onlyKeys){
+  const raw=rawCats(d), sup=pairSupport(d), par={};
+  const find=x=>par[x]===x?x:(par[x]=find(par[x]));
+  onlyKeys.forEach(k=>par[k]=k);
+  sup.forEach((v,pk)=>{ if(v<thr) return; const [a,b]=pk.split('\u0001'); if(par[a]!==undefined&&par[b]!==undefined) par[find(a)]=find(b); });
+  const g={}; onlyKeys.forEach(k=>{(g[find(k)]=g[find(k)]||[]).push(k);});
+  return Object.values(g).map(ks=>ks.sort((a,b)=>raw.get(b).n-raw.get(a).n));
+}
+function nameFor(raw,keys){ return raw.get(keys[0]).text; }
+function addFinal(keys,name){ mutFin(f=>f.push({id:'c'+uid(),name,members:keys})); }
+function setErr(m){ S.err=m; const e=$('#err'); if(e) e.textContent=m; }
+
+const ACT = {
+  setlang(el){ LANG=el.dataset.v; try{localStorage.setItem('ct_lang',LANG);}catch(e){} render(); },
+  async join(){
+    const code=($('#code').value||'').trim(), name=($('#name').value||'').trim();
+    if(!/^\d{4}$/.test(code)) return setErr(tr('errCode'));
+    if(!name) return setErr(tr('errName'));
+    let room; try{ room=await store.get(code); }catch(e){ return setErr(tr('errConn')); }
+    if(!room) return setErr(tr('errNoRoom'));
+    if(!room.config) return setErr(tr('errNoConfig'));
+    LANG = normalizeConfig(room.config).lang;
+    let sid=null;
+    const ex=Object.entries(room.students||{}).find(([id,s])=>norm(s.name)===norm(name));
+    if(ex){ if(confirm(tr('nameExists',name))) sid=ex[0]; else return setErr(tr('errOther')); }
+    if(!sid){ sid='s'+uid(); await store.set(code,'students/'+sid,{name,joined:Date.now()}); }
+    sessionStorage.setItem('ct_student',JSON.stringify({room:code,sid,name}));
+    startSession('student',code,sid,name);
+  },
+  newroom(){ let skip=false; try{skip=localStorage.getItem('ct_skipintro')==='1';}catch(e){} S.pre = skip?'setup':'intro'; S.err=''; render(); },
+  tosetup(){ const c=$('#noshow'); if(c&&c.checked){ try{localStorage.setItem('ct_skipintro','1');}catch(e){} } S.pre='setup'; render(); },
+  addcol(){ if(setup.cols.length<MAX_COLS) setup.cols.push(''); render(); },
+  rmcol(el){ if(setup.cols.length>MIN_COLS) setup.cols.splice(+el.dataset.i,1); render(); },
+  async createroom(){
+    const cfg=effCfg();
+    if(cfg.cols.length<MIN_COLS){ S.err=tr('errCols'); render(); return; }
+    let code; do{ code=String(Math.floor(1000+Math.random()*9000)); }while(await store.get(code));
+    await store.set(code,'',{phase:0,created:Date.now(),config:cfg});
+    localStorage.setItem('ct_teacher',JSON.stringify({room:code}));
+    setup=null; startSession('teacher',code);
+  },
+  resume(){ const t0=JSON.parse(localStorage.getItem('ct_teacher')); startSession('teacher',t0.room); },
+  leave(){ store.unlisten(); S.role=null; S.pre=null; S.data=null; S.loaded=false; CFG=null; S.err=''; sessionStorage.removeItem('ct_student');
+    try{ LANG=localStorage.getItem('ct_lang')||'he'; }catch(e){} lastSig=null; render(); },
+  addfld(el){ const a=draft.items[el.dataset.rel]; if(a.length<CFG.max) a.push(''); render(); },
+  addcat(){ draft.cats.push(''); render(); },
+  done(){
+    const d=S.data, p=d.phase;
+    if(p===1){ const tot=cols().reduce((s,r)=>s+draft.items[r.k].filter(x=>x.trim()).length,0); if(!tot && !confirm(tr('emptyConfirm'))) return; }
+    flushSave(); if(p===1) saveItems(); if(p===2) saveCats();
+    store.set(S.room,'students/'+S.sid+'/done/'+p,true);
+  },
+  reopen(){ store.set(S.room,'students/'+S.sid+'/done/'+S.data.phase,null); },
+  gtoggle(el){ const k=el.dataset.key; ui.group.has(k)?ui.group.delete(k):ui.group.add(k); render(); },
+  mkgroup(){
+    const raw=rawCats(S.data), g=[...ui.group].map(k=>raw.get(k)?raw.get(k).text:k);
+    const gs=A(S.data.groups&&S.data.groups[S.sid]).map(A); gs.push(g); ui.group.clear();
+    store.set(S.room,'groups/'+S.sid,gs);
+  },
+  rmgroup(el){ const gs=A(S.data.groups&&S.data.groups[S.sid]).map(A); gs.splice(+el.dataset.i,1); store.set(S.room,'groups/'+S.sid,gs); },
+  openlist(el){ const id=el.dataset.id; ui.open.has(id)?ui.open.delete(id):ui.open.add(id); render(); },
+  pick(el){ const k=el.dataset.key; ui.selItem = ui.selItem===k?null:k; render(); },
+  putsel(el,e){ if(e.target.closest('[data-act="unassign"]')) return; if(ui.selItem){ addAssign(el.dataset.cid,ui.selItem); ui.selItem=null; } },
+  unassign(el){ const cid=el.dataset.cid, key=el.dataset.key; const a=A(S.data.assign&&S.data.assign[S.sid]&&S.data.assign[S.sid][cid]).filter(k=>k!==key); store.set(S.room,'assign/'+S.sid+'/'+cid,a.length?a:null); },
+  next(){
+    const d=S.data,p=d.phase||0;
+    if(p>=1&&p<=3){ const n=Object.keys(d.students||{}).length,k=doneCount(d,p); if(k<n && !confirm(tr('onlyDone',k,n))) return; }
+    if(p===0&&!Object.keys(d.students||{}).length && !confirm(tr('noStudents'))) return;
+    if(p===3){ ui.sel.clear(); }
+    store.set(S.room,'phase',p+1);
+  },
+  prev(){ const p=S.data.phase||0; if(p>0) store.set(S.room,'phase',p-1); },
+  seltoggle(el){ const k=el.dataset.key; ui.sel.has(k)?ui.sel.delete(k):ui.sel.add(k); render(); },
+  selnone(){ ui.sel.clear(); render(); },
+  mkfin(){
+    const raw=rawCats(S.data), keys=[...ui.sel].sort((a,b)=>raw.get(b).n-raw.get(a).n);
+    const name=prompt(tr('finName'),raw.get(keys[0]).text); if(!name||!name.trim()) return;
+    ui.sel.clear(); addFinal(keys,name.trim());
+  },
+  addsel(el){ const id=el.dataset.id, keys=[...ui.sel]; ui.sel.clear(); mutFin(f=>{ const c=f.find(x=>x.id===id); if(c) keys.forEach(k=>{ if(!c.members.includes(k)) c.members.push(k); }); }); },
+  rmmember(el){ mutFin(f=>{ const c=f.find(x=>x.id===el.dataset.id); if(c) c.members=c.members.filter(k=>k!==el.dataset.key); }); },
+  renfin(el){ const c=finalList(S.data).find(x=>x.id===el.dataset.id); const n=prompt(tr('newName'),c.name); if(n&&n.trim()) mutFin(f=>{ f.find(x=>x.id===c.id).name=n.trim(); }); },
+  delfin(el){ if(confirm(tr('delFinConfirm'))) mutFin(f=>{ const i=f.findIndex(x=>x.id===el.dataset.id); if(i>=0) f.splice(i,1); }); },
+  auto(){
+    const thr=Math.max(1,+($('#thr').value)||1); ui.thr=thr;
+    const d=S.data, raw=rawCats(d), used=assignedKeys(finalList(d));
+    const free=[...raw.keys()].filter(k=>!used.has(k));
+    const cl=clusters(d,thr,free).filter(ks=>ks.length>=2);
+    if(!cl.length){ alert(tr('noClusters')); return; }
+    mutFin(f=>cl.forEach(ks=>f.push({id:'c'+uid(),name:nameFor(raw,ks),members:ks})));
+  },
+  restsingle(){
+    const d=S.data, raw=rawCats(d), used=assignedKeys(finalList(d));
+    const free=[...raw.values()].filter(c=>!used.has(c.key)).sort((a,b)=>b.n-a.n);
+    if(!free.length) return;
+    mutFin(f=>free.forEach(c=>f.push({id:'c'+uid(),name:c.text,members:[c.key]})));
+  },
+  adoptgrp(el){
+    const d=S.data, raw=rawCats(d), used=assignedKeys(finalList(d));
+    const g=groupSummary(d).slice(0,12)[+el.dataset.i];
+    const keys=g.keys.filter(k=>!used.has(k)&&raw.has(k)).sort((a,b)=>raw.get(b).n-raw.get(a).n);
+    if(!keys.length){ alert(tr('allAssigned')); return; }
+    const name=prompt(tr('finName'),raw.get(keys[0]).text); if(!name||!name.trim()) return;
+    addFinal(keys,name.trim());
+  },
+  tview(el){ ui.tview=el.dataset.v; render(); },
+  focus(el){ ui.focus=el.dataset.id; ui.tview='one'; render(); },
+  focus1(el){ ui.focus=el.dataset.id; render(); },
+  csv(){
+    const agg=aggregate(S.data,ui.minVotes); const rows=[tr('csvHead')];
+    agg.res.forEach(c=>c.list.forEach(i=>rows.push([c.name,colOf(i.rel).name,i.text,i.voters.length])));
+    const csv='﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='results-'+S.room+'.csv'; a.click();
+  },
+  delroom(){ if(confirm(tr('delRoomConfirm'))){ store.set(S.room,'',null); localStorage.removeItem('ct_teacher'); } },
+  seed(){ seedStudents(); },
+  seedassign(){ seedAssign(); }
+};
+
+function startSession(role,room,sid,name){
+  S.role=role; S.pre=null; S.room=room; S.sid=sid||null; S.name=name||null; S.loaded=false; S.data=null; S.err='';
+  draft={items:null,cats:null}; lastSig=null; ui.sel.clear(); ui.group.clear(); ui.open.clear(); ui.selItem=null;
+  render();
+  store.listen(room,onData);
+}
+function saveItems(){
+  const o={}; cols().forEach(r=>{ const seen=new Set(), a=[]; draft.items[r.k].forEach(s=>{ const x=s.trim(),k=norm(x); if(x&&!seen.has(k)){seen.add(k);a.push(x);} }); o[r.k]=a; });
+  store.set(S.room,'items/'+S.sid,o);
+}
+function saveCats(){
+  const seen=new Set(), a=[]; draft.cats.forEach(s=>{ const x=s.trim(),k=norm(x); if(x&&!seen.has(k)){seen.add(k);a.push(x);} });
+  store.set(S.room,'cats/'+S.sid,a);
+}
+function addAssign(cid,key){
+  const cur=A(S.data.assign&&S.data.assign[S.sid]&&S.data.assign[S.sid][cid]);
+  if(cur.includes(key)) return;
+  store.set(S.room,'assign/'+S.sid+'/'+cid,[...cur,key]);
+}
+
+/* ============ אירועים ============ */
+app.addEventListener('click',e=>{ const el=e.target.closest('[data-act]'); if(el&&ACT[el.dataset.act]) ACT[el.dataset.act](el,e); });
+app.addEventListener('input',e=>{
+  const el=e.target; if(!el.classList) return;
+  if(el.dataset.bind){
+    const b=el.dataset.bind;
+    if(b==='col') setup.cols[+el.dataset.i]=el.value; else setup[b]=el.value;
+    if(b!=='lang'){ const p=$('#pv'); if(p) p.innerHTML=previewHTML(); }
+    return;
+  }
+  if(!el.classList.contains('fld')) return;
+  const i=+el.dataset.i;
+  if(el.dataset.kind==='item'){ draft.items[el.dataset.rel][i]=el.value; queueSave(saveItems); }
+  else { draft.cats[i]=el.value; queueSave(saveCats); }
+});
+app.addEventListener('change',e=>{
+  if(e.target.dataset&&e.target.dataset.bind==='lang'){ setup.lang=e.target.value; LANG=setup.lang; try{localStorage.setItem('ct_lang',LANG);}catch(x){} render(); return; }
+  if(e.target.id==='minv'){ ui.minVotes=Math.max(1,+e.target.value||1); render(); }
+  if(e.target.id==='thr'){ ui.thr=Math.max(1,+e.target.value||1); }
+});
+app.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('fld')){
+    e.preventDefault();
+    const nx=[...e.target.closest('.col, .card').querySelectorAll('.fld')]; const j=nx.indexOf(e.target); if(nx[j+1]) nx[j+1].focus();
+  }
+});
+app.addEventListener('dragstart',e=>{ const c=e.target.closest&&e.target.closest('[data-key][draggable="true"]'); if(c){ e.dataTransfer.setData('text/plain',c.dataset.key); e.dataTransfer.effectAllowed='copy'; } });
+app.addEventListener('dragover',e=>{ const c=e.target.closest&&e.target.closest('.cat'); if(c){ e.preventDefault(); c.classList.add('over'); } });
+app.addEventListener('dragleave',e=>{ const c=e.target.closest&&e.target.closest('.cat'); if(c&&!c.contains(e.relatedTarget)) c.classList.remove('over'); });
+app.addEventListener('drop',e=>{ const c=e.target.closest&&e.target.closest('.cat'); if(c){ e.preventDefault(); c.classList.remove('over'); const k=e.dataTransfer.getData('text/plain'); if(k) addAssign(c.dataset.cid,k); } });
+
+/* ============ נתוני דמה לבדיקה (דוגמת דתות, לבדיקת תצוגה בלבד) ============ */
+const DEMO={
+ he:{
+  names:['נועה','דניאל','מיכל','יוסף','שירה','אורי','תמר','איתי'],
+  items:[
+   [['משה','d'],['אברהם','d'],['שבת','h'],['פסח','h'],['ירושלים','p'],['הכותל','p'],['תורה','b'],['תלמוד','b'],['בר מצווה','t'],['ברית מילה','t'],['בית כנסת','m'],['רב','m'],['כשרות','t']],
+   [['ישו','d'],['מריה','d'],['האפיפיור','d'],['חג המולד','h'],['פסחא','h'],['בית לחם','p'],['ירושלים','p'],['ברית חדשה','b'],['תהילים','b'],['טבילה','t'],['מיסה','t'],['כנסייה','m'],['כומר','m']],
+   [['מוחמד','d'],['אברהם','d'],['רמדאן','h'],['עיד אל פיטר','h'],['מכה','p'],['ירושלים','p'],['קוראן','b'],['חדית','b'],['צום','t'],['חאג','t'],['מסגד','m'],['אימאם','m']]],
+  fam:{d:['דמויות','אישים','דמויות מרכזיות'],h:['חגים','מועדים'],p:['מקומות קדושים','מקומות','אתרים'],b:['ספרים קדושים','כתבי קודש'],t:['טקסים','מנהגים','פולחן'],m:['מוסדות','אנשי דת ומוסדות']}},
+ en:{
+  names:['Noa','Daniel','Michal','Joseph','Shira','Uri','Tamar','Itai'],
+  items:[
+   [['Moses','d'],['Abraham','d'],['Sabbath','h'],['Passover','h'],['Jerusalem','p'],['Western Wall','p'],['Torah','b'],['Talmud','b'],['Bar Mitzvah','t'],['Circumcision','t'],['Synagogue','m'],['Rabbi','m'],['Kashrut','t']],
+   [['Jesus','d'],['Mary','d'],['The Pope','d'],['Christmas','h'],['Easter','h'],['Bethlehem','p'],['Jerusalem','p'],['New Testament','b'],['Psalms','b'],['Baptism','t'],['Mass','t'],['Church','m'],['Priest','m']],
+   [['Muhammad','d'],['Abraham','d'],['Ramadan','h'],['Eid al-Fitr','h'],['Mecca','p'],['Jerusalem','p'],['Quran','b'],['Hadith','b'],['Fasting','t'],['Hajj','t'],['Mosque','m'],['Imam','m']]],
+  fam:{d:['Figures','People','Key figures'],h:['Festivals','Holidays'],p:['Holy places','Places','Sites'],b:['Holy books','Scriptures'],t:['Rituals','Customs','Worship'],m:['Institutions','Clergy and institutions']}}
+};
+function seedStudents(){
+  const D=DEMO[LANG]||DEMO.he, r=S.room, cs=cols();
+  const all=D.names.map((nm,i)=>{
+    const items={}; cs.forEach((x,ci)=>{ items[x.k]=shuffle(D.items[ci%3]).slice(0,7+Math.floor(Math.random()*4)).map(a=>a[0]); });
+    const fams=shuffle(Object.keys(D.fam)).slice(0,4+Math.floor(Math.random()*3));
+    return {id:'demo'+i,nm,items,cats:fams.map(f=>rnd(D.fam[f]))};
+  });
+  const union=new Set(all.flatMap(s=>s.cats));
+  all.forEach(s=>{
+    const groups=[]; Object.values(D.fam).forEach(vs=>{ const g=vs.filter(v=>union.has(v)&&Math.random()<.85); if(g.length>1) groups.push(g); });
+    store.set(r,'students/'+s.id,{name:s.nm,done:{1:true,2:true,3:true},demo:true});
+    store.set(r,'items/'+s.id,s.items); store.set(r,'cats/'+s.id,s.cats); store.set(r,'groups/'+s.id,groups);
+  });
+}
+function seedAssign(){
+  const D=DEMO[LANG]||DEMO.he, d=S.data, fin=finalList(d), FAMOF={};
+  cols().forEach((x,ci)=>D.items[ci%3].forEach(([tx,f])=>FAMOF[x.k+'|'+norm(tx)]=f));
+  const famCat={}; Object.entries(D.fam).forEach(([f,vs])=>{ const c=fin.find(c=>vs.some(v=>c.members.includes(norm(v)))); if(c) famCat[f]=c.id; });
+  Object.entries(d.students||{}).filter(([id,s])=>s.demo).forEach(([id])=>{
+    const a={}; cols().forEach(x=>A(d.items&&d.items[id]&&d.items[id][x.k]).forEach(tx=>{
+      const key=x.k+'|'+norm(tx), cid=famCat[FAMOF[key]]; if(cid&&Math.random()<.85) (a[cid]=a[cid]||[]).push(key);
+    }));
+    store.set(S.room,'assign/'+id,a);
+  });
+}
+
+/* ============ התחלה ============ */
+(async function(){
+  try{ await store.init(); }catch(e){ app.innerHTML='<main><div class="card center"><h2>Firebase connection error</h2><p>'+esc(e.message)+'</p></div></main>'; return; }
+  let saved=null; try{ saved=JSON.parse(sessionStorage.getItem('ct_student')); }catch(e){}
+  if(saved && saved.room){ startSession('student',saved.room,saved.sid,saved.name); } else render();
+})();
+</script>
+</body>
+</html>
